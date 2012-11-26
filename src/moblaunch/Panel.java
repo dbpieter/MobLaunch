@@ -25,8 +25,8 @@ import javax.swing.ListSelectionModel;
 public class Panel extends JPanel {
 
     private DefaultListModel model;
-    private final JList jList1;
-    private JTextArea jTextArea1;
+    private final JList exeList;
+    private JTextArea logArea;
     private AutoRunThread autorun;
     private Process process;
 
@@ -34,8 +34,8 @@ public class Panel extends JPanel {
         process = null;
         autorun = new AutoRunThread(this);
         model = new DefaultListModel();
-        jList1 = new JList(model);
-        jList1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        exeList = new JList(model);
+        exeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane jScrollPane1 = new JScrollPane();
         JButton startButton = new JButton();
@@ -43,24 +43,24 @@ public class Panel extends JPanel {
         JButton upButton = new JButton();
         JButton downButton = new JButton();
         JButton autorunButton = new JButton();
-        JButton jButton6 = new JButton();
-        JButton jButton7 = new JButton();
-        JScrollPane jScrollPane2 = new JScrollPane();
-        jScrollPane1.setViewportView(jList1);
-        JTextField jTextField1 = new JTextField(autorun.getReeksDelay().toString());
-        jTextField1.setColumns(5);
-        JTextField jTextField2 = new JTextField(autorun.getAudioDelay().toString());
-        jTextField2.setColumns(5);
-        JLabel reeksLabel = new JLabel("Montage wachttijd:");
-        JLabel jLabel2 = new JLabel("Bindtekst wachttijd:");
-        jScrollPane1.setViewportView(jList1);
-        jTextArea1 = new JTextArea();
-        jTextArea1.setEditable(false);
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
+        JButton stopAutorunButton = new JButton();
+        JButton stopCurrentButton = new JButton();
+        JScrollPane logScrollPane = new JScrollPane();
+        jScrollPane1.setViewportView(exeList);
+        JTextField showDelayField = new JTextField(autorun.getReeksDelay().toString());
+        showDelayField.setColumns(5);
+        JTextField audioDelayField = new JTextField(autorun.getAudioDelay().toString());
+        audioDelayField.setColumns(5);
+        JLabel showLabel = new JLabel("Montage wachttijd:");
+        JLabel audioLabel = new JLabel("Bindtekst wachttijd:");
+        jScrollPane1.setViewportView(exeList);
+        logArea = new JTextArea();
+        logArea.setEditable(false);
+        logArea.setColumns(20);
+        logArea.setRows(5);
+        logScrollPane.setViewportView(logArea);
 
-        jTextField1.addFocusListener(new FocusListener() {
+        showDelayField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
                 if (!e.isTemporary()) {
@@ -84,7 +84,7 @@ public class Panel extends JPanel {
             }
         });
 
-        jTextField2.addFocusListener(new FocusListener() {
+        audioDelayField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
                 if (!e.isTemporary()) {
@@ -113,10 +113,10 @@ public class Panel extends JPanel {
         removeButton.setAction(new AbstractAction("Verwijder") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (jList1.getSelectedIndex() == -1 && !model.isEmpty()) {
+                if (exeList.getSelectedIndex() == -1 && !model.isEmpty()) {
                     return;
                 }
-                model.removeElementAt(jList1.getSelectedIndex());
+                model.removeElementAt(exeList.getSelectedIndex());
             }
         });
 
@@ -127,7 +127,7 @@ public class Panel extends JPanel {
                     JOptionPane.showMessageDialog(Panel.this, "Autorun loopt ! Er kan geen afzonderlijke reeks worden gestart", "Oeps", JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
-                String command = ((File) jList1.getSelectedValue()).getAbsolutePath() + " /2";
+                String command = ((File) exeList.getSelectedValue()).getAbsolutePath() + " /2";
                 try {
                     process = Runtime.getRuntime().exec(command);
                 } catch (IOException ex) {
@@ -139,13 +139,13 @@ public class Panel extends JPanel {
         upButton.setAction(new AbstractAction("Omhoog") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (jList1.getSelectedIndex() != -1 && jList1.getSelectedIndex() != 0) {
-                    int current = jList1.getSelectedIndex();
+                if (exeList.getSelectedIndex() != -1 && exeList.getSelectedIndex() != 0) {
+                    int current = exeList.getSelectedIndex();
                     Object prev = model.getElementAt(current - 1);
                     Object curr = model.getElementAt(current);
                     model.set(current - 1, curr);
                     model.set(current, prev);
-                    jList1.setSelectedIndex(current - 1);
+                    exeList.setSelectedIndex(current - 1);
                 }
             }
         });
@@ -153,13 +153,13 @@ public class Panel extends JPanel {
         downButton.setAction(new AbstractAction("Omlaag") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (jList1.getSelectedIndex() != -1 && jList1.getSelectedIndex() != model.getSize() - 1) {
-                    int current = jList1.getSelectedIndex();
+                if (exeList.getSelectedIndex() != -1 && exeList.getSelectedIndex() != model.getSize() - 1) {
+                    int current = exeList.getSelectedIndex();
                     Object next = model.getElementAt(current + 1);
                     Object curr = model.getElementAt(current);
                     model.set(current + 1, curr);
                     model.set(current, next);
-                    jList1.setSelectedIndex(current + 1);
+                    exeList.setSelectedIndex(current + 1);
                 }
             }
         });
@@ -181,7 +181,7 @@ public class Panel extends JPanel {
             }
         });
 
-        jButton6.setAction(new AbstractAction("Stop autorun") {
+        stopAutorunButton.setAction(new AbstractAction("Stop autorun") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (autorun != null) {
@@ -190,7 +190,7 @@ public class Panel extends JPanel {
             }
         });
 
-        jButton7.setAction(new AbstractAction("Huidige stoppen") {
+        stopCurrentButton.setAction(new AbstractAction("Huidige stoppen") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (process != null) {
@@ -200,8 +200,8 @@ public class Panel extends JPanel {
             }
         });
 
-        jList1.setModel(model);
-        jScrollPane1.setViewportView(jList1);
+        exeList.setModel(model);
+        jScrollPane1.setViewportView(exeList);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -212,7 +212,7 @@ public class Panel extends JPanel {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 604, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                .addComponent(logScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(removeButton, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
@@ -220,18 +220,18 @@ public class Panel extends JPanel {
                 .addComponent(startButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(reeksLabel)
-                .addComponent(jLabel2))
+                .addComponent(showLabel)
+                .addComponent(audioLabel))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jTextField2)
-                .addComponent(jTextField1))))
+                .addComponent(audioDelayField)
+                .addComponent(showDelayField))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                 .addComponent(autorunButton, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
-                .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(stopAutorunButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(downButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addComponent(stopCurrentButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(24, Short.MAX_VALUE)));
         layout.setVerticalGroup(
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -245,7 +245,7 @@ public class Panel extends JPanel {
                 .addComponent(autorunButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(stopAutorunButton, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addComponent(removeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -255,15 +255,15 @@ public class Panel extends JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                 .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(reeksLabel)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(showLabel)
+                .addComponent(showDelayField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(jLabel2)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addComponent(jButton7, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
+                .addComponent(audioLabel)
+                .addComponent(audioDelayField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(stopCurrentButton, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)))
+                .addComponent(logScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)))
                 .addContainerGap()));
 
     }
@@ -272,13 +272,13 @@ public class Panel extends JPanel {
         return model;
     }
 
-    public synchronized JList getjList1() {
-        return jList1;
+    public synchronized JList getExeList() {
+        return exeList;
     }
 
     public synchronized void log(String message) {
-        jTextArea1.append(message);
-        jTextArea1.append("\n");
+        logArea.append(message);
+        logArea.append("\n");
     }
 
     public void newAutoRunThread() {

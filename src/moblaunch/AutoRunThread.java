@@ -23,7 +23,7 @@ public class AutoRunThread extends Thread {
     @Override
     public void run() {
         while (true) {
-            String command = ((File) panel.getjList1().getSelectedValue()).getAbsolutePath();
+            String command = ((File) panel.getExeList().getSelectedValue()).getAbsolutePath();
             int lastSlash = command.lastIndexOf('\\');
             String exeName = command.substring(lastSlash + 1, command.length());
             exeName = exeName.concat("\"");
@@ -68,12 +68,12 @@ public class AutoRunThread extends Thread {
             }
             panel.log(exeName + " is beëindigd");
             
-            if (panel.getjList1().getSelectedIndex() == panel.getModel().getSize() - 1) {
+            if (panel.getExeList().getSelectedIndex() == panel.getModel().getSize() - 1) {
                 running = false;
                 //panel.log("autorun beëindigd");
                 break;
             } else {
-                panel.getjList1().setSelectedIndex(panel.getjList1().getSelectedIndex() + 1);
+                panel.getExeList().setSelectedIndex(panel.getExeList().getSelectedIndex() + 1);
             }
         }
         panel.log("autorun beëindigd");
